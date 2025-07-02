@@ -5,8 +5,8 @@ def main():
     # Define symbols
     x, y, z = sym.symbols('x y z')
     theta, phi = sym.symbols('theta phi', positive=True)
-    H1, H2, H3 = sym.symbols('H[0] H[1] H[2]')
-    N1, N2, N3 = sym.symbols('N[0] N[1] N[2]')
+    H1, H2, H3 = sym.symbols('H1 H2 H3')
+    N1, N2, N3 = sym.symbols('N1 N2 N3')
     K1, K2 = sym.symbols('K1 K2')
     Ms = sym.symbols('Ms')
 
