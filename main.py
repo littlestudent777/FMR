@@ -23,6 +23,11 @@ experiments = [
         "fields": [my.Anisotropy(K1=-4.2e5, K2=1.0e5)]
     },
     {
+        "description":"Demagnetization Field (Cylinder, x is inf)",
+        "m":  [1.0, 0.0, 0.0],
+        "fields": [my.DemagnetizingField(N=np.array([0.0, 0.5, 0.5]))]
+    },
+    {
         "description": "Combination of anisotropy, external Field, and demagnetizing Field",
         "m": [0.97852257, 0.19680969, 0.0613149],
         "fields": [
