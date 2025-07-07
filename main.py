@@ -23,9 +23,9 @@ experiments = [
         "fields": [my.Anisotropy(K1=-4.2e5, K2=1.0e5)]
     },
     {
-        "description":"Demagnetization Field (Cylinder, x is inf)",
-        "m":  [1.0, 0.0, 0.0],
-        "fields": [my.DemagnetizingField(N=np.array([0.0, 0.5, 0.5]))]
+        "description": "Demagnetization Field (Cylinder, z is inf)",
+        "m": [0.0, 0.0, 1.0],
+        "fields": [my.DemagnetizingField(N=np.array([0.5, 0.5, 0.0]))]
     },
     {
         "description": "Combination of anisotropy, external Field, and demagnetizing Field",
@@ -43,13 +43,9 @@ for exp in experiments:
     print(f"\n{exp['description']}")
     print(f"Magnetization direction: {exp['m']}")
 
-    theta = np.arccos(exp['m'][2])
-    phi = np.arctan2(exp['m'][1], exp['m'][0])
-
     try:
         omega = my.calculate_fmr_frequency(
-            theta=theta,
-            phi=phi,
+            m=exp['m'],
             fields=exp['fields']
         )
         print(f"FMR frequency: {omega:.3e} rad/s")

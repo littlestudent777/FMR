@@ -125,7 +125,47 @@ def calculate_total_second_derivatives(theta: float, phi: float, fields: list[Fi
     return G_theta_theta, G_phi_phi, G_theta_phi
 
 
-def calculate_fmr_frequency(theta: float, phi: float, fields: list[Field],
+def rotate(m: list[float], fields: list[Field]) -> tuple[float, float, list[Field]]:
+    """
+    Rotates the coordinate system when m[2] is close to ±1 (sin(theta) is close to 0).
+    The rotation is performed by pi/2 around the y-axis, transforming z to x.
+
+    Parameters:
+    ----------
+    m: Magnetization vector
+    fields: List of field objects (components that affect the sample)
+
+    Returns:
+    -----------
+    (theta, phi, rotated_fields): New angles and rotated fields
+    """
+    # Rotate the magnetization vector: pi/2 around y-axis (z → x), (x → -z)
+    m_new = np.array([m[2], m[1], -m[0]])
+
+    # Calculate new angles
+    theta = np.arccos(m_new[2])
+    phi = np.arctan2(m_new[1], m_new[0])
+
+    # Rotate the fields
+    new_fields = []
+    for field in fields:
+        if isinstance(field, ExternalField):
+            # Rotate H: [Hx, Hy, Hz] → [Hz, Hy, -Hx]
+            H_new = np.array([field.H[2], field.H[1], -field.H[0]])
+            rotated_field = ExternalField(H_new, field.Ms)
+        elif isinstance(field, DemagnetizingField):
+            # Rotate N: [N1, N2, N3] → [N3, N2, N1]
+            N_new = np.array([field.N[2], field.N[1], field.N[0]])
+            rotated_field = DemagnetizingField(N_new, field.Ms)
+        else:
+            # Anisotropy remains unchanged
+            rotated_field = field
+        new_fields.append(rotated_field)
+
+    return theta, phi, new_fields
+
+
+def calculate_fmr_frequency(m: list[float], fields: list[Field],
                             gamma: float = 1.76e7, Ms: float = 1707) -> float:
     """
     Calculates the ferromagnetic resonance frequency.
@@ -134,15 +174,17 @@ def calculate_fmr_frequency(theta: float, phi: float, fields: list[Field],
     ----------
     gamma: Gyromagnetic ratio [rad/(s·G)] (default corresponds to electron)
     Ms: Saturation magnetization [emu/cc] (default corresponds to Fe)
-    theta: Equilibrium polar angle (in radians)
-    phi: Equilibrium azimuth angle (in radians)
     fields: List of field objects (components that affect the sample)
     Returns:
     -----------
     FMR frequency [rad/s]
     """
-    if np.isclose(np.sin(theta), 0):
-        raise ValueError("θ is close to 0 or pi (sin(θ) is close to 0).\n This formula cannot be used.")
+    if np.isclose(abs(m[2]), 1):
+        # Formula cannot be used in this case (sin(theta) = 0), so the axis rotation is applied
+        theta, phi, fields = rotate(m, fields)
+    else:
+        theta = np.arccos(m[2])
+        phi = np.arctan2(m[1], m[0])
 
     G_theta_theta, G_phi_phi, G_theta_phi = calculate_total_second_derivatives(theta, phi, fields)
     term = G_theta_theta * G_phi_phi - G_theta_phi * G_theta_phi
