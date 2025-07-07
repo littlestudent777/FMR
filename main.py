@@ -48,6 +48,6 @@ for exp in experiments:
             m=exp['m'],
             fields=exp['fields']
         )
-        print(f"FMR frequency: {omega:.3e} rad/s")
+        print(f"FMR frequency: {omega:.3f} Ghz")
     except ValueError as e:
         print(f"Error: {e}")

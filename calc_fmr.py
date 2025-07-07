@@ -177,7 +177,7 @@ def calculate_fmr_frequency(m: list[float], fields: list[Field],
     fields: List of field objects (components that affect the sample)
     Returns:
     -----------
-    FMR frequency [rad/s]
+    FMR frequency in GHz
     """
     if np.isclose(abs(m[2]), 1):
         # Formula cannot be used in this case (sin(theta) = 0), so the axis rotation is applied
@@ -192,6 +192,8 @@ def calculate_fmr_frequency(m: list[float], fields: list[Field],
     if term < 0:
         raise ValueError("The radical expression is negative.")
 
-    return (gamma / (Ms * np.sin(theta))) * np.sqrt(term)
+    freq = (gamma / (Ms * np.sin(theta))) * np.sqrt(term)
+
+    return freq * 1e-9 / (2 * np.pi)
 
 
